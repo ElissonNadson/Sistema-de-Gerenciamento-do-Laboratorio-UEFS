@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permitir leitura pública do documento de configuração do laboratório
+    match /lab/config {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Permitir apenas usuários autenticados a acessar outros documentos
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
