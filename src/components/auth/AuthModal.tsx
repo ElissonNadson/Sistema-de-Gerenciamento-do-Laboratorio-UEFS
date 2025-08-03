@@ -43,7 +43,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, defaultMode = 'login' }:
     email: string;
     password: string;
     confirmPassword: string;
-    tipoUsuario: 'aluno' | 'administrador';
+    tipoUsuario: 'professor' | 'administrador';
   }) => {
     const result = await register(credentials);
     if (result.success) {

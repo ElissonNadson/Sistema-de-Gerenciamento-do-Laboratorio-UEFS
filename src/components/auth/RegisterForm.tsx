@@ -19,7 +19,7 @@ export function RegisterForm({ onRegister, onBackToLogin, loading = false }: Reg
     email: '',
     password: '',
     confirmPassword: '',
-    tipoUsuario: 'aluno'
+    tipoUsuario: 'professor'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -143,12 +143,12 @@ export function RegisterForm({ onRegister, onBackToLogin, loading = false }: Reg
             <Select
               id="tipoUsuario"
               value={formData.tipoUsuario}
-              onChange={(e) => handleInputChange('tipoUsuario', e.target.value as 'aluno' | 'administrador')}
+              onChange={(e) => handleInputChange('tipoUsuario', e.target.value as 'professor' | 'administrador')}
               disabled={loading}
               className={errors.tipoUsuario ? 'border-red-500' : ''}
             >
               <option value="" disabled>Selecione o tipo de usuário</option>
-              <option value="aluno">Aluno</option>
+              <option value="professor">Professor</option>
               <option value="administrador">Administrador</option>
             </Select>
             {errors.tipoUsuario && (

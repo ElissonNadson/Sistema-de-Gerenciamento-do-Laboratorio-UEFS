@@ -7,6 +7,12 @@ service cloud.firestore {
         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipoUsuario == 'administrador';
     }
     
+    // Helper function to check if user is professor
+    function isProfessor() {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipoUsuario == 'professor';
+    }
+    
     // Public read access to lab configuration
     match /lab/config {
       allow read: if true;
@@ -17,6 +23,7 @@ service cloud.firestore {
     match /usuarios/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       allow read: if isAdmin(); // Admins can read all user profiles
+      allow create: if request.auth != null; // Allow user creation during registration
     }
     
     // Laboratory management (schedules, alerts, etc.)
@@ -25,10 +32,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
-    // Schedule management
+    // Schedule management - professors can create/edit their own, admins can manage all
     match /horarios/{document} {
       allow read: if request.auth != null;
-      allow create: if request.auth != null;
+      allow create: if request.auth != null && (isProfessor() || isAdmin());
+      allow update, delete: if request.auth != null && 
+        (resource.data.professorId == request.auth.uid || isAdmin());
+    }
+    
+    // Reservations - similar to schedules
+    match /reservas/{document} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && (isProfessor() || isAdmin());
       allow update, delete: if request.auth != null && 
         (resource.data.professorId == request.auth.uid || isAdmin());
     }
@@ -38,29 +53,15 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
     
+    // System notifications and alerts
+    match /notificacoes/{document} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
     // Default deny for other collections
     match /{document=**} {
       allow read, write: if false;
-    // Permitir acesso apenas para usuários autenticados
-    match /{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Regras específicas para o sistema de laboratório
-    match /usuarios/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    match /horarios/{document} {
-      allow read, write: if request.auth != null;
-    }
-    
-    match /laboratorios/{document} {
-      allow read, write: if request.auth != null;
-    }
-    
-    match /reservas/{document} {
-      allow read, write: if request.auth != null;
     }
   }
 }

@@ -2,7 +2,7 @@ export interface UserProfile {
   uid: string;
   email: string;
   nome: string;
-  tipoUsuario: 'aluno' | 'administrador';
+  tipoUsuario: 'professor' | 'administrador';
   criadoEm: Date;
   ativo: boolean;
   photoURL?: string;
@@ -26,7 +26,7 @@ export interface RegisterCredentials {
   email: string;
   password: string;
   confirmPassword: string;
-  tipoUsuario: 'aluno' | 'administrador';
+  tipoUsuario: 'professor' | 'administrador';
 }
 
 export interface AuthResult {
