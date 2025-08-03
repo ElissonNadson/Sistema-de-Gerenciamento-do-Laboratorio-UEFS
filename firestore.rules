@@ -1,5 +1,4 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
     // Helper function to check if user is admin
@@ -42,6 +41,26 @@ service cloud.firestore {
     // Default deny for other collections
     match /{document=**} {
       allow read, write: if false;
+    // Permitir acesso apenas para usuários autenticados
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Regras específicas para o sistema de laboratório
+    match /usuarios/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    match /horarios/{document} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /laboratorios/{document} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /reservas/{document} {
+      allow read, write: if request.auth != null;
     }
   }
 }
