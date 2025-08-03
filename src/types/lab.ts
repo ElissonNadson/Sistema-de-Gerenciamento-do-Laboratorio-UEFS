@@ -21,6 +21,7 @@ export interface LabConfig {
   lastUpdate: string;
 }
 
+// Legacy User interface for backward compatibility
 export interface User {
   uid: string;
   email: string;
