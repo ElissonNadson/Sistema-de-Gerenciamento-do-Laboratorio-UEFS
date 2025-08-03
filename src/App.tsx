@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, User, LogOut } from 'lucide-react';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { ScheduleGrid } from './components/dashboard/ScheduleGrid';
@@ -7,18 +7,19 @@ import { StatusIndicator } from './components/dashboard/StatusIndicator';
 import { AlertBanner } from './components/dashboard/AlertBanner';
 import { ModernCalendar } from './components/dashboard/ModernCalendar';
 import { AdminPanel } from './components/admin/AdminPanel';
-import { LoginModal } from './components/admin/LoginModal';
+import { AuthModal } from './components/auth/AuthModal';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Button } from './components/ui/button';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from './contexts/AuthContext';
 import { useLabData } from './hooks/useLabData';
 import { useRealTimeStatus } from './hooks/useRealTimeStatus';
 
 function App() {
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   
-  const { user, loading: authLoading, login, logout } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const { config, loading: dataLoading, error, updateConfig } = useLabData();
   const currentStatus = useRealTimeStatus(config);
 
@@ -31,24 +32,31 @@ function App() {
     return date;
   }).filter(date => date.getDay() !== 0 && date.getDay() !== 6); // Exclude weekends
 
-  const handleLogin = async (email: string, password: string) => {
-    const result = await login(email, password);
-    if (result.success) {
-      setShowAdminPanel(true);
-    }
-    return result;
-  };
-
   const handleLogout = async () => {
-    await logout();
-    setShowAdminPanel(false);
+    const result = await logout();
+    if (result.success) {
+      setShowAdminPanel(false);
+    }
   };
 
   const handleAdminAccess = () => {
     if (user) {
-      setShowAdminPanel(true);
+      // Check if user is admin
+      if (user.profile?.tipoUsuario === 'administrador') {
+        setShowAdminPanel(true);
+      } else {
+        // Show message that user doesn't have admin access
+        alert('Acesso negado. Apenas administradores podem acessar esta área.');
+      }
     } else {
-      setShowLoginModal(true);
+      setShowAuthModal(true);
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    // After successful login, check if user is admin to show admin panel
+    if (user?.profile?.tipoUsuario === 'administrador') {
+      setShowAdminPanel(true);
     }
   };
 
@@ -81,20 +89,22 @@ function App() {
     );
   }
 
-  if (showAdminPanel && user) {
+  if (showAdminPanel && user?.profile?.tipoUsuario === 'administrador') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-uefs-gray-50 to-uefs-primary/5">
-        <Header currentStatus={currentStatus} />
-        <main className="container mx-auto px-4 py-8">
-          <AdminPanel
-            user={user}
-            config={config}
-            onLogout={handleLogout}
-            onUpdateConfig={updateConfig}
-          />
-        </main>
-        <Footer />
-      </div>
+      <ProtectedRoute requiredRole="administrador">
+        <div className="min-h-screen bg-gradient-to-br from-uefs-gray-50 to-uefs-primary/5">
+          <Header currentStatus={currentStatus} />
+          <main className="container mx-auto px-4 py-8">
+            <AdminPanel
+              user={user}
+              config={config}
+              onLogout={handleLogout}
+              onUpdateConfig={updateConfig}
+            />
+          </main>
+          <Footer />
+        </div>
+      </ProtectedRoute>
     );
   }
 
@@ -141,21 +151,45 @@ function App() {
       
       <Footer />
       
-      {/* Floating Admin Button */}
-      <Button
-        onClick={handleAdminAccess}
-        className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-uefs-lg bg-uefs-primary hover:bg-uefs-dark transition-all duration-300 hover:scale-110"
-        size="icon"
-      >
-        <Settings className="w-6 h-6" />
-      </Button>
+      {/* User Status Indicator and Floating Buttons */}
+      <div className="fixed bottom-6 right-6 flex flex-col items-end space-y-3">
+        {user && (
+          <div className="bg-white rounded-lg shadow-lg p-3 flex items-center space-x-3 border">
+            <div className="flex items-center space-x-2">
+              <User className="w-4 h-4 text-uefs-primary" />
+              <div className="text-sm">
+                <p className="font-medium text-uefs-dark">{user.profile?.nome || user.displayName}</p>
+                <p className="text-xs text-uefs-gray-600 capitalize">{user.profile?.tipoUsuario}</p>
+              </div>
+            </div>
+            <Button
+              onClick={handleLogout}
+              size="sm"
+              variant="outline"
+              className="flex items-center space-x-1"
+            >
+              <LogOut className="w-3 h-3" />
+              <span>Sair</span>
+            </Button>
+          </div>
+        )}
+        
+        {/* Admin Access Button */}
+        <Button
+          onClick={handleAdminAccess}
+          className="rounded-full w-14 h-14 shadow-uefs-lg bg-uefs-primary hover:bg-uefs-dark transition-all duration-300 hover:scale-110"
+          size="icon"
+        >
+          <Settings className="w-6 h-6" />
+        </Button>
+      </div>
       
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLogin={handleLogin}
-        loading={authLoading}
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+        defaultMode="login"
       />
     </div>
   );

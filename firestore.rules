@@ -1,6 +1,46 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipoUsuario == 'administrador';
+    }
+    
+    // Public read access to lab configuration
+    match /lab/config {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    // User profile documents - users can read/write their own profile
+    match /usuarios/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAdmin(); // Admins can read all user profiles
+    }
+    
+    // Laboratory management (schedules, alerts, etc.)
+    match /laboratorios/{document} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // Schedule management
+    match /horarios/{document} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && 
+        (resource.data.professorId == request.auth.uid || isAdmin());
+    }
+    
+    // Admin logs and actions
+    match /admin_logs/{document} {
+      allow read, write: if isAdmin();
+    }
+    
+    // Default deny for other collections
+    match /{document=**} {
+      allow read, write: if false;
     // Permitir acesso apenas para usuários autenticados
     match /{document=**} {
       allow read, write: if request.auth != null;

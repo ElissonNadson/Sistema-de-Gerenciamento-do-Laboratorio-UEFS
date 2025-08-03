@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Settings, LogOut, AlertTriangle, Clock, MessageSquare } from 'lucide-react';
-import type { LabConfig, User } from '../../types/lab';
+import type { LabConfig } from '../../types/lab';
+import type { AuthUser } from '../../types/auth.types';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { ScheduleEditor } from './ScheduleEditor';
 
 interface AdminPanelProps {
-  user: User;
+  user: AuthUser;
   config: LabConfig;
   onLogout: () => void;
   onUpdateConfig: (updates: Partial<LabConfig>) => Promise<{ success: boolean; error: string | null }>;
@@ -82,7 +83,12 @@ export function AdminPanel({ user, config, onLogout, onUpdateConfig }: AdminPane
                 <span>Painel Administrativo</span>
               </CardTitle>
               <CardDescription>
-                Logado como: {user.email}
+                Logado como: {user.profile?.nome || user.displayName || user.email}
+                {user.profile?.tipoUsuario && (
+                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full capitalize">
+                    {user.profile.tipoUsuario}
+                  </span>
+                )}
               </CardDescription>
             </div>
             <Button variant="outline" onClick={onLogout} className="mt-4 md:mt-0">
