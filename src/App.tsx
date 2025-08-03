@@ -10,7 +10,7 @@ import { AdminPanel } from './components/admin/AdminPanel';
 import { AuthModal } from './components/auth/AuthModal';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Button } from './components/ui/button';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from './hooks/useAuth';
 import { useLabData } from './hooks/useLabData';
 import { useRealTimeStatus } from './hooks/useRealTimeStatus';
 
