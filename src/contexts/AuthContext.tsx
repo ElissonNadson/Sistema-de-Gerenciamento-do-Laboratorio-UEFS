@@ -72,7 +72,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return undefined;
   };
 
-  const createUserProfile = async (firebaseUser: FirebaseUser, nome: string, tipoUsuario: 'aluno' | 'administrador'): Promise<UserProfile> => {
+  const createUserProfile = async (firebaseUser: FirebaseUser, nome: string, tipoUsuario: 'professor' | 'administrador'): Promise<UserProfile> => {
     const userProfile: UserProfile = {
       uid: firebaseUser.uid,
       email: firebaseUser.email || '',

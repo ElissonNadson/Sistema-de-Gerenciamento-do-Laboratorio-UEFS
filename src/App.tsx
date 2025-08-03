@@ -9,6 +9,8 @@ import { ModernCalendar } from './components/dashboard/ModernCalendar';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { AuthModal } from './components/auth/AuthModal';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { Login } from './components/Auth/Login';
+import { FullScreenLoadingSpinner } from './components/Common/LoadingSpinner';
 import { Button } from './components/ui/button';
 import { useAuth } from './hooks/useAuth';
 import { useLabData } from './hooks/useLabData';
@@ -24,6 +26,11 @@ function App() {
   const currentStatus = useRealTimeStatus(config);
 
   const isLoading = authLoading || dataLoading;
+
+  // Show login page if user is not authenticated
+  if (!authLoading && !user) {
+    return <Login />;
+  }
 
   // Generate sample available dates for the calendar (next 30 days, excluding weekends)
   const availableDates = Array.from({ length: 30 }, (_, i) => {
@@ -61,14 +68,7 @@ function App() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-uefs-gray-50 to-uefs-primary/5 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-4 border-uefs-primary mx-auto"></div>
-          <p className="mt-4 text-uefs-gray-600 font-medium">Carregando...</p>
-        </div>
-      </div>
-    );
+    return <FullScreenLoadingSpinner text="Carregando sistema..." />;
   }
 
   if (error) {

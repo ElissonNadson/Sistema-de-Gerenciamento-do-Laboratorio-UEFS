@@ -1,9 +1,10 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { FullScreenLoadingSpinner } from '../Common/LoadingSpinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'aluno' | 'administrador';
+  requiredRole?: 'professor' | 'administrador';
   fallback?: React.ReactNode;
 }
 
@@ -12,14 +13,7 @@ export function ProtectedRoute({ children, requiredRole, fallback }: ProtectedRo
 
   // Show loading spinner while checking authentication
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-uefs-gray-50 to-uefs-primary/5 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-4 border-uefs-primary mx-auto"></div>
-          <p className="mt-4 text-uefs-gray-600 font-medium">Verificando autenticação...</p>
-        </div>
-      </div>
-    );
+    return <FullScreenLoadingSpinner text="Verificando autenticação..." />;
   }
 
   // If user is not authenticated, show fallback or redirect message
@@ -50,7 +44,7 @@ export function ProtectedRoute({ children, requiredRole, fallback }: ProtectedRo
             Você não tem permissão para acessar esta área do sistema.
           </p>
           <p className="text-sm text-uefs-gray-500">
-            Área restrita para: {requiredRole === 'administrador' ? 'Administradores' : 'Alunos'}
+            Área restrita para: {requiredRole === 'administrador' ? 'Administradores' : 'Professores'}
           </p>
         </div>
       </div>
