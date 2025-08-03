@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/config';
+import { AuthContext } from './AuthContext';
 import type {
   AuthContextType,
   AuthUser,
@@ -18,16 +19,6 @@ import type {
   RegisterCredentials,
   AuthResult
 } from '../types/auth.types';
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -120,27 +111,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
 
       return { success: true, user: authUser };
-    } catch (error: any) {
+    } catch (error: unknown) {
       let errorMessage = 'Erro ao fazer login';
       
-      switch (error.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'Usuário não encontrado';
-          break;
-        case 'auth/wrong-password':
-          errorMessage = 'Senha incorreta';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'Email inválido';
-          break;
-        case 'auth/user-disabled':
-          errorMessage = 'Usuário desabilitado';
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = 'Muitas tentativas. Tente novamente mais tarde';
-          break;
-        default:
-          errorMessage = error.message || 'Erro desconhecido';
+      if (error && typeof error === 'object' && 'code' in error) {
+        const firebaseError = error as { code: string; message?: string };
+        switch (firebaseError.code) {
+          case 'auth/user-not-found':
+            errorMessage = 'Usuário não encontrado';
+            break;
+          case 'auth/wrong-password':
+            errorMessage = 'Senha incorreta';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'Email inválido';
+            break;
+          case 'auth/user-disabled':
+            errorMessage = 'Usuário desabilitado';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Muitas tentativas. Tente novamente mais tarde';
+            break;
+          default:
+            errorMessage = firebaseError.message || 'Erro desconhecido';
+        }
       }
 
       return { success: false, error: errorMessage };
@@ -171,24 +165,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
 
       return { success: true, user: authUser };
-    } catch (error: any) {
+    } catch (error: unknown) {
       let errorMessage = 'Erro ao criar conta';
       
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errorMessage = 'Este email já está em uso';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'Email inválido';
-          break;
-        case 'auth/operation-not-allowed':
-          errorMessage = 'Operação não permitida';
-          break;
-        case 'auth/weak-password':
-          errorMessage = 'Senha muito fraca. Use pelo menos 6 caracteres';
-          break;
-        default:
-          errorMessage = error.message || 'Erro desconhecido';
+      if (error && typeof error === 'object' && 'code' in error) {
+        const firebaseError = error as { code: string; message?: string };
+        switch (firebaseError.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = 'Este email já está em uso';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'Email inválido';
+            break;
+          case 'auth/operation-not-allowed':
+            errorMessage = 'Operação não permitida';
+            break;
+          case 'auth/weak-password':
+            errorMessage = 'Senha muito fraca. Use pelo menos 6 caracteres';
+            break;
+          default:
+            errorMessage = firebaseError.message || 'Erro desconhecido';
+        }
       }
 
       return { success: false, error: errorMessage };
@@ -201,8 +198,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await signOut(auth);
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message || 'Erro ao fazer logout' };
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer logout';
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -210,18 +208,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await sendPasswordResetEmail(auth, email);
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       let errorMessage = 'Erro ao enviar email de recuperação';
       
-      switch (error.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'Usuário não encontrado';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'Email inválido';
-          break;
-        default:
-          errorMessage = error.message || 'Erro desconhecido';
+      if (error && typeof error === 'object' && 'code' in error) {
+        const firebaseError = error as { code: string; message?: string };
+        switch (firebaseError.code) {
+          case 'auth/user-not-found':
+            errorMessage = 'Usuário não encontrado';
+            break;
+          case 'auth/invalid-email':
+            errorMessage = 'Email inválido';
+            break;
+          default:
+            errorMessage = firebaseError.message || 'Erro desconhecido';
+        }
       }
 
       return { success: false, error: errorMessage };
@@ -246,8 +247,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message || 'Erro ao atualizar perfil' };
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar perfil';
+      return { success: false, error: errorMessage };
     }
   };
 
