@@ -148,14 +148,16 @@ export function DailyScheduleManager() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card>
+      <Card className="bg-gradient-to-r from-uefs-primary/5 to-uefs-secondary/5 border-uefs-primary/20">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5" />
+          <CardTitle className="flex items-center space-x-3 text-2xl">
+            <div className="w-10 h-10 bg-gradient-to-br from-uefs-primary to-uefs-secondary rounded-full flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-white" />
+            </div>
             <span>Gerenciar Horários Diários</span>
           </CardTitle>
-          <CardDescription>
-            Configure horários específicos para cada dia
+          <CardDescription className="text-lg">
+            Configure horários específicos para cada dia do calendário
           </CardDescription>
         </CardHeader>
       </Card>

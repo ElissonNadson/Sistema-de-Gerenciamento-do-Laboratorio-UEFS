@@ -92,14 +92,16 @@ export function ModernCalendar({
 
   return (
     <div className={cn(
-      "bg-white rounded-xl shadow-uefs border border-uefs-gray-200 p-6",
+      "bg-white rounded-2xl shadow-2xl border border-uefs-gray-200 p-6 transform transition-all duration-300 hover:shadow-3xl",
       className
     )}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <Calendar className="w-5 h-5 text-uefs-primary" />
-          <h3 className="text-lg font-semibold text-uefs-dark capitalize">
+          <div className="w-10 h-10 bg-gradient-to-br from-uefs-primary to-uefs-secondary rounded-full flex items-center justify-center">
+            <Calendar className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-uefs-dark capitalize">
             {monthName}
           </h3>
         </div>
@@ -107,39 +109,39 @@ export function ModernCalendar({
         <div className="flex items-center space-x-2">
           <button
             onClick={() => navigateMonth('prev')}
-            className="p-2 rounded-lg hover:bg-uefs-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-uefs-gray-100 transition-colors group"
           >
-            <ChevronLeft className="w-4 h-4 text-uefs-gray-600" />
+            <ChevronLeft className="w-5 h-5 text-uefs-gray-600 group-hover:text-uefs-primary" />
           </button>
           <button
             onClick={() => navigateMonth('next')}
-            className="p-2 rounded-lg hover:bg-uefs-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-uefs-gray-100 transition-colors group"
           >
-            <ChevronRight className="w-4 h-4 text-uefs-gray-600" />
+            <ChevronRight className="w-5 h-5 text-uefs-gray-600 group-hover:text-uefs-primary" />
           </button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="flex items-center justify-between mb-4 p-3 bg-uefs-gray-50 rounded-lg">
+      <div className="flex items-center justify-between mb-6 p-4 bg-gradient-to-r from-uefs-gray-50 to-uefs-primary/5 rounded-xl border border-uefs-gray-100">
         <div className="flex items-center space-x-2">
           <Clock className="w-4 h-4 text-uefs-accent" />
-          <span className="text-sm text-uefs-gray-700">
-            {availableCount} dias funcionando / {scheduledCount} dias programados
+          <span className="text-sm font-medium text-uefs-gray-700">
+            {availableCount} funcionando / {scheduledCount} programados
           </span>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-3">
           <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-uefs-accent rounded-full"></div>
-            <span className="text-xs text-uefs-gray-600">Funcionando</span>
+            <div className="w-3 h-3 bg-uefs-accent rounded-full shadow-sm"></div>
+            <span className="text-xs text-uefs-gray-600 font-medium">Funcionando</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-uefs-danger rounded-full"></div>
-            <span className="text-xs text-uefs-gray-600">Fechado</span>
+            <div className="w-3 h-3 bg-uefs-danger rounded-full shadow-sm"></div>
+            <span className="text-xs text-uefs-gray-600 font-medium">Fechado</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-uefs-gray-300 rounded-full"></div>
-            <span className="text-xs text-uefs-gray-600">Sem dados</span>
+            <div className="w-3 h-3 bg-uefs-gray-300 rounded-full shadow-sm"></div>
+            <span className="text-xs text-uefs-gray-600 font-medium">Sem dados</span>
           </div>
         </div>
       </div>

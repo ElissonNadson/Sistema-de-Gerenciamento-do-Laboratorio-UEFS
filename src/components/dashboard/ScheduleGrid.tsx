@@ -1,6 +1,7 @@
 import type { LabConfig, DayOfWeek, DailySchedule } from '../../types/lab';
 import { getCurrentDay, formatDayName, formatTime } from '../../lib/timeUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Clock, Calendar, X, ArrowLeft } from 'lucide-react';
 
 interface ScheduleGridProps {
   config: LabConfig;
@@ -19,60 +20,77 @@ export function ScheduleGrid({ config, selectedDate, dailySchedules }: ScheduleG
     
     return (
       <div className="w-full">
-        <div className="bg-white rounded-xl shadow-uefs border border-uefs-gray-200 p-6">
-          <h2 className="text-2xl font-bold text-center mb-6 text-uefs-dark">
-            Horário para {selectedDate.toLocaleDateString('pt-BR', { 
-              weekday: 'long', 
-              day: 'numeric', 
-              month: 'long',
-              year: 'numeric'
-            })}
-          </h2>
+        <div className="bg-white rounded-2xl shadow-2xl border border-uefs-gray-200 p-8 transform transition-all duration-300 hover:shadow-3xl">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-uefs-dark mb-2">
+              Horário para {selectedDate.toLocaleDateString('pt-BR', { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long',
+                year: 'numeric'
+              })}
+            </h2>
+            <div className="w-32 h-1 bg-gradient-to-r from-uefs-primary to-uefs-secondary rounded-full mx-auto"></div>
+          </div>
           
-          <div className="mb-6 p-4 bg-uefs-primary/5 rounded-lg border border-uefs-primary/20">
-            <p className="text-center text-uefs-primary text-sm font-medium">
-              📅 Data selecionada: {selectedDate.toLocaleDateString('pt-BR')}
+          <div className="mb-8 p-6 bg-gradient-to-r from-uefs-primary/10 to-uefs-secondary/10 rounded-xl border border-uefs-primary/20">
+            <p className="text-center text-uefs-primary text-lg font-bold">
+              📅 {selectedDate.toLocaleDateString('pt-BR', { 
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
+              })}
             </p>
           </div>
           
           {dailySchedule ? (
-            <Card className="max-w-md mx-auto bg-gradient-to-br from-uefs-primary/5 to-uefs-accent/5 border-uefs-primary/20">
-              <CardHeader className="text-center">
-                <CardTitle className="text-xl text-uefs-primary">
+            <Card className="max-w-lg mx-auto bg-gradient-to-br from-white to-uefs-primary/5 border-2 border-uefs-primary/20 shadow-xl">
+              <CardHeader className="text-center pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-uefs-primary to-uefs-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Clock className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl text-uefs-primary">
                   {selectedDate.toLocaleDateString('pt-BR', { weekday: 'long' })}
                 </CardTitle>
               </CardHeader>
               
-              <CardContent className="text-center">
+              <CardContent className="text-center pb-8">
                 {dailySchedule.active ? (
                   <div>
-                    <div className="text-3xl font-bold text-uefs-accent mb-2">
-                      {formatTime(dailySchedule.start)}
+                    <div className="mb-6">
+                      <div className="text-4xl font-bold text-uefs-accent mb-3">
+                        {formatTime(dailySchedule.start)}
+                      </div>
+                      <div className="text-uefs-gray-500 text-lg mb-3 font-medium">às</div>
+                      <div className="text-4xl font-bold text-uefs-accent mb-6">
+                        {formatTime(dailySchedule.end)}
+                      </div>
                     </div>
-                    <div className="text-uefs-gray-500 text-sm mb-2">às</div>
-                    <div className="text-3xl font-bold text-uefs-accent mb-4">
-                      {formatTime(dailySchedule.end)}
-                    </div>
-                    <div className="px-4 py-2 bg-uefs-accent/10 rounded-full text-sm text-uefs-accent font-medium border border-uefs-accent/20">
-                      ✓ Funcionando
+                    <div className="px-6 py-3 bg-gradient-to-r from-uefs-accent to-uefs-accent/90 rounded-full text-white font-bold border border-uefs-accent/20 shadow-lg">
+                      ✓ Laboratório Funcionando
                     </div>
                     {dailySchedule.notes && (
-                      <div className="mt-4 p-3 bg-uefs-gray-50 rounded-lg text-sm text-uefs-gray-700">
-                        📝 {dailySchedule.notes}
+                      <div className="mt-6 p-4 bg-gradient-to-r from-uefs-gray-50 to-uefs-primary/5 rounded-xl text-uefs-gray-700 border border-uefs-gray-200">
+                        <div className="text-sm font-medium text-uefs-primary mb-2">📝 Observações:</div>
+                        <div className="text-sm">{dailySchedule.notes}</div>
                       </div>
                     )}
                   </div>
                 ) : (
                   <div>
-                    <div className="text-2xl font-bold text-uefs-gray-400 mb-4">
-                      Fechado
+                    <div className="w-16 h-16 bg-uefs-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <X className="w-8 h-8 text-uefs-gray-400" />
                     </div>
-                    <div className="px-4 py-2 bg-uefs-gray-100 rounded-full text-sm text-uefs-gray-400 border border-uefs-gray-200">
-                      ✗ Não funciona
+                    <div className="text-3xl font-bold text-uefs-gray-400 mb-6">
+                      Laboratório Fechado
+                    </div>
+                    <div className="px-6 py-3 bg-uefs-gray-100 rounded-full text-uefs-gray-600 border border-uefs-gray-200">
+                      ✗ Não funciona neste dia
                     </div>
                     {dailySchedule.notes && (
-                      <div className="mt-4 p-3 bg-uefs-gray-50 rounded-lg text-sm text-uefs-gray-700">
-                        📝 {dailySchedule.notes}
+                      <div className="mt-6 p-4 bg-uefs-gray-50 rounded-xl text-uefs-gray-700 border border-uefs-gray-200">
+                        <div className="text-sm font-medium text-uefs-gray-600 mb-2">📝 Motivo:</div>
+                        <div className="text-sm">{dailySchedule.notes}</div>
                       </div>
                     )}
                   </div>
@@ -80,13 +98,18 @@ export function ScheduleGrid({ config, selectedDate, dailySchedules }: ScheduleG
               </CardContent>
             </Card>
           ) : (
-            <Card className="max-w-md mx-auto bg-uefs-gray-50 border-uefs-gray-200">
-              <CardContent className="text-center py-8">
-                <div className="text-xl text-uefs-gray-400 mb-2">📅</div>
-                <div className="text-uefs-gray-600 mb-2">
-                  Horário não definido para esta data
+            <Card className="max-w-lg mx-auto bg-gradient-to-br from-uefs-gray-50 to-uefs-gray-100 border-2 border-uefs-gray-200">
+              <CardContent className="text-center py-12">
+                <div className="w-16 h-16 bg-uefs-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="w-8 h-8 text-uefs-gray-400" />
                 </div>
-                <div className="text-sm text-uefs-gray-500">
+                <div className="text-xl text-uefs-gray-600 mb-4 font-medium">
+                  Horário não definido
+                </div>
+                <div className="text-sm text-uefs-gray-500 mb-6">
+                  Ainda não há horário cadastrado para esta data
+                </div>
+                <div className="px-4 py-2 bg-uefs-gray-200 rounded-full text-xs text-uefs-gray-600">
                   Entre em contato para mais informações
                 </div>
               </CardContent>
@@ -96,9 +119,10 @@ export function ScheduleGrid({ config, selectedDate, dailySchedules }: ScheduleG
           <div className="mt-8 text-center">
             <button 
               onClick={() => window.location.reload()} 
-              className="text-uefs-primary hover:text-uefs-dark text-sm font-medium"
+              className="inline-flex items-center space-x-2 text-uefs-primary hover:text-uefs-dark text-lg font-bold transition-colors duration-300 group"
             >
-              ← Voltar ao cronograma semanal
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" />
+              <span>Voltar ao cronograma semanal</span>
             </button>
           </div>
         </div>
@@ -130,10 +154,13 @@ export function ScheduleGrid({ config, selectedDate, dailySchedules }: ScheduleG
 
   return (
     <div className="w-full">
-      <div className="bg-white rounded-xl shadow-uefs border border-uefs-gray-200 p-6">
-        <h2 className="text-2xl font-bold text-center mb-6 text-uefs-dark">
-          {getDateTitle()}
-        </h2>
+      <div className="bg-white rounded-2xl shadow-2xl border border-uefs-gray-200 p-6 transform transition-all duration-300 hover:shadow-3xl">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-uefs-dark mb-2">
+            {getDateTitle()}
+          </h2>
+          <div className="w-24 h-1 bg-gradient-to-r from-uefs-primary to-uefs-secondary rounded-full mx-auto"></div>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {days.map((day) => {
