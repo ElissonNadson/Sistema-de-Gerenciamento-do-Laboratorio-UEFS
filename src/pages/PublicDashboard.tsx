@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, User, LogIn } from 'lucide-react';
+import { Settings, User, LogIn, Download } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { ScheduleGrid } from '../components/dashboard/ScheduleGrid';
@@ -10,8 +10,10 @@ import { AuthModal } from '../components/auth/AuthModal';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../hooks/useAuth';
 import { useLabData } from '../hooks/useLabData';
+import { useDailySchedules } from '../hooks/useDailySchedules';
 import { useRealTimeStatus } from '../hooks/useRealTimeStatus';
 import { useNavigate } from 'react-router-dom';
+import { exportDailySchedulesToExcel } from '../lib/excelExport';
 
 export function PublicDashboard() {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -19,17 +21,23 @@ export function PublicDashboard() {
   
   const { user, logout } = useAuth();
   const { config, loading: dataLoading, error } = useLabData();
+  const { dailySchedules, loading: schedulesLoading } = useDailySchedules();
   const currentStatus = useRealTimeStatus(config);
   const navigate = useNavigate();
 
-  const isLoading = dataLoading;
+  const isLoading = dataLoading || schedulesLoading;
 
   // Generate sample available dates for the calendar (next 30 days, excluding weekends)
-  const availableDates = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-    return date;
-  }).filter(date => date.getDay() !== 0 && date.getDay() !== 6); // Exclude weekends
+  // This is now replaced by actual daily schedules from Firebase
+  
+  const handleExcelExport = () => {
+    const result = exportDailySchedulesToExcel(dailySchedules);
+    if (result.success) {
+      alert(`Arquivo Excel exportado com sucesso: ${result.fileName}`);
+    } else {
+      alert(`Erro ao exportar Excel: ${result.error}`);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -106,7 +114,7 @@ export function PublicDashboard() {
           {/* Calendar */}
           <div className="lg:col-span-1">
             <ModernCalendar
-              availableDates={availableDates}
+              dailySchedules={dailySchedules}
               selectedDate={selectedDate}
               onDateSelect={setSelectedDate}
             />
@@ -114,8 +122,27 @@ export function PublicDashboard() {
           
           {/* Schedule Grid */}
           <div className="lg:col-span-2">
-            <ScheduleGrid config={config} selectedDate={selectedDate} />
+            <ScheduleGrid 
+              config={config} 
+              selectedDate={selectedDate} 
+              dailySchedules={dailySchedules}
+            />
           </div>
+        </div>
+        
+        {/* Export Button */}
+        <div className="text-center mb-8">
+          <Button
+            onClick={handleExcelExport}
+            className="bg-uefs-accent hover:bg-uefs-accent/90 text-white font-medium px-6 py-3 rounded-lg shadow-lg transition-all duration-300 hover:scale-105"
+            disabled={!dailySchedules || Object.keys(dailySchedules).length === 0}
+          >
+            <Download className="w-5 h-5 mr-2" />
+            Exportar Cronograma em Excel
+          </Button>
+          <p className="text-sm text-uefs-gray-500 mt-2">
+            Baixe o cronograma completo com todos os horários programados
+          </p>
         </div>
         
         {/* Last Update */}

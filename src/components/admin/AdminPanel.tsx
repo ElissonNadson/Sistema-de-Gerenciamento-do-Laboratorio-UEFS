@@ -7,6 +7,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ScheduleEditor } from './ScheduleEditor';
+import { DailyScheduleManager } from './DailyScheduleManager';
 
 interface AdminPanelProps {
   user: AuthUser;
@@ -177,6 +178,9 @@ export function AdminPanel({ user, config, onLogout, onUpdateConfig }: AdminPane
 
       {/* Schedule Editor */}
       <ScheduleEditor config={config} onSave={onUpdateConfig} />
+
+      {/* Daily Schedule Manager */}
+      <DailyScheduleManager />
 
       {/* Messages */}
       {message && (
