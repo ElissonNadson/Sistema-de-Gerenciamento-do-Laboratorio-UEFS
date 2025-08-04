@@ -22,6 +22,9 @@ dist-ssr
 # Firebase
 .firebase/
 
+# Old backup files
+*.old
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

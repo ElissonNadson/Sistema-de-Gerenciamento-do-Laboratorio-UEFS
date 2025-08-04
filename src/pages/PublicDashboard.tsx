@@ -1,36 +1,28 @@
 import { useState } from 'react';
-import { Settings, User, LogOut } from 'lucide-react';
-import { Header } from './components/layout/Header';
-import { Footer } from './components/layout/Footer';
-import { ScheduleGrid } from './components/dashboard/ScheduleGrid';
-import { StatusIndicator } from './components/dashboard/StatusIndicator';
-import { AlertBanner } from './components/dashboard/AlertBanner';
-import { ModernCalendar } from './components/dashboard/ModernCalendar';
-import { AdminPanel } from './components/admin/AdminPanel';
-import { AuthModal } from './components/auth/AuthModal';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { Login } from './components/Auth/Login';
-import { FullScreenLoadingSpinner } from './components/Common/LoadingSpinner';
-import { Button } from './components/ui/button';
-import { useAuth } from './hooks/useAuth';
-import { useLabData } from './hooks/useLabData';
-import { useRealTimeStatus } from './hooks/useRealTimeStatus';
+import { Settings, User, LogIn } from 'lucide-react';
+import { Header } from '../components/layout/Header';
+import { Footer } from '../components/layout/Footer';
+import { ScheduleGrid } from '../components/dashboard/ScheduleGrid';
+import { StatusIndicator } from '../components/dashboard/StatusIndicator';
+import { AlertBanner } from '../components/dashboard/AlertBanner';
+import { ModernCalendar } from '../components/dashboard/ModernCalendar';
+import { AuthModal } from '../components/auth/AuthModal';
+import { Button } from '../components/ui/button';
+import { useAuth } from '../hooks/useAuth';
+import { useLabData } from '../hooks/useLabData';
+import { useRealTimeStatus } from '../hooks/useRealTimeStatus';
+import { useNavigate } from 'react-router-dom';
 
-function App() {
+export function PublicDashboard() {
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   
-  const { user, loading: authLoading, logout } = useAuth();
-  const { config, loading: dataLoading, error, updateConfig } = useLabData();
+  const { user, logout } = useAuth();
+  const { config, loading: dataLoading, error } = useLabData();
   const currentStatus = useRealTimeStatus(config);
+  const navigate = useNavigate();
 
-  const isLoading = authLoading || dataLoading;
-
-  // Show login page if user is not authenticated
-  if (!authLoading && !user) {
-    return <Login />;
-  }
+  const isLoading = dataLoading;
 
   // Generate sample available dates for the calendar (next 30 days, excluding weekends)
   const availableDates = Array.from({ length: 30 }, (_, i) => {
@@ -40,35 +32,37 @@ function App() {
   }).filter(date => date.getDay() !== 0 && date.getDay() !== 6); // Exclude weekends
 
   const handleLogout = async () => {
-    const result = await logout();
-    if (result.success) {
-      setShowAdminPanel(false);
-    }
+    await logout();
+    setShowAuthModal(false);
   };
 
   const handleAdminAccess = () => {
     if (user) {
-      // Check if user is admin
-      if (user.profile?.tipoUsuario === 'administrador') {
-        setShowAdminPanel(true);
-      } else {
-        // Show message that user doesn't have admin access
-        alert('Acesso negado. Apenas administradores podem acessar esta área.');
-      }
+      // User is already authenticated, they can navigate to admin
+      navigate('/admin');
     } else {
+      // Show auth modal for login
       setShowAuthModal(true);
     }
   };
 
   const handleAuthSuccess = () => {
-    // After successful login, check if user is admin to show admin panel
+    setShowAuthModal(false);
+    // After successful login, redirect to admin if user is admin
     if (user?.profile?.tipoUsuario === 'administrador') {
-      setShowAdminPanel(true);
+      navigate('/admin');
     }
   };
 
   if (isLoading) {
-    return <FullScreenLoadingSpinner text="Carregando sistema..." />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-uefs-gray-50 to-uefs-primary/5 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-uefs-primary mx-auto mb-4"></div>
+          <p className="text-uefs-gray-600">Carregando sistema...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -86,25 +80,6 @@ function App() {
           </Button>
         </div>
       </div>
-    );
-  }
-
-  if (showAdminPanel && user?.profile?.tipoUsuario === 'administrador') {
-    return (
-      <ProtectedRoute requiredRole="administrador">
-        <div className="min-h-screen bg-gradient-to-br from-uefs-gray-50 to-uefs-primary/5">
-          <Header currentStatus={currentStatus} />
-          <main className="container mx-auto px-4 py-8">
-            <AdminPanel
-              user={user}
-              config={config}
-              onLogout={handleLogout}
-              onUpdateConfig={updateConfig}
-            />
-          </main>
-          <Footer />
-        </div>
-      </ProtectedRoute>
     );
   }
 
@@ -168,7 +143,7 @@ function App() {
               variant="outline"
               className="flex items-center space-x-1"
             >
-              <LogOut className="w-3 h-3" />
+              <LogIn className="w-3 h-3" />
               <span>Sair</span>
             </Button>
           </div>
@@ -179,6 +154,7 @@ function App() {
           onClick={handleAdminAccess}
           className="rounded-full w-14 h-14 shadow-uefs-lg bg-uefs-primary hover:bg-uefs-dark transition-all duration-300 hover:scale-110"
           size="icon"
+          title={user ? "Acessar Painel Admin" : "Login Admin"}
         >
           <Settings className="w-6 h-6" />
         </Button>
@@ -194,5 +170,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
