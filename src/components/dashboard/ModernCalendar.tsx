@@ -1,16 +1,17 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, Clock } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import type { DailySchedule } from '../../types/lab';
 
 interface CalendarProps {
-  availableDates: Date[];
+  dailySchedules?: { [dateKey: string]: DailySchedule };
   selectedDate?: Date;
   onDateSelect?: (date: Date) => void;
   className?: string;
 }
 
 export function ModernCalendar({ 
-  availableDates, 
+  dailySchedules, 
   selectedDate, 
   onDateSelect, 
   className 
@@ -47,9 +48,13 @@ export function ModernCalendar({
   }, [currentMonth]);
 
   const isDateAvailable = (date: Date) => {
-    return availableDates.some(availableDate => 
-      availableDate.toDateString() === date.toDateString()
-    );
+    const dateKey = date.toISOString().split('T')[0];
+    return dailySchedules?.[dateKey]?.active || false;
+  };
+
+  const hasSchedule = (date: Date) => {
+    const dateKey = date.toISOString().split('T')[0];
+    return Boolean(dailySchedules?.[dateKey]);
   };
 
   const isDateSelected = (date: Date) => {
@@ -72,21 +77,31 @@ export function ModernCalendar({
     });
   };
 
-  const availableCount = availableDates.filter(date => 
-    date.getMonth() === currentMonth.getMonth() && 
-    date.getFullYear() === currentMonth.getFullYear()
-  ).length;
+  const availableCount = dailySchedules ? Object.keys(dailySchedules).filter(dateKey => {
+    const date = new Date(dateKey);
+    return date.getMonth() === currentMonth.getMonth() && 
+           date.getFullYear() === currentMonth.getFullYear() &&
+           dailySchedules[dateKey].active;
+  }).length : 0;
+
+  const scheduledCount = dailySchedules ? Object.keys(dailySchedules).filter(dateKey => {
+    const date = new Date(dateKey);
+    return date.getMonth() === currentMonth.getMonth() && 
+           date.getFullYear() === currentMonth.getFullYear();
+  }).length : 0;
 
   return (
     <div className={cn(
-      "bg-white rounded-xl shadow-uefs border border-uefs-gray-200 p-6",
+      "bg-white rounded-2xl shadow-2xl border border-uefs-gray-200 p-6 transform transition-all duration-300 hover:shadow-3xl",
       className
     )}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <Calendar className="w-5 h-5 text-uefs-primary" />
-          <h3 className="text-lg font-semibold text-uefs-dark capitalize">
+          <div className="w-10 h-10 bg-gradient-to-br from-uefs-primary to-uefs-secondary rounded-full flex items-center justify-center">
+            <Calendar className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-uefs-dark capitalize">
             {monthName}
           </h3>
         </div>
@@ -94,35 +109,39 @@ export function ModernCalendar({
         <div className="flex items-center space-x-2">
           <button
             onClick={() => navigateMonth('prev')}
-            className="p-2 rounded-lg hover:bg-uefs-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-uefs-gray-100 transition-colors group"
           >
-            <ChevronLeft className="w-4 h-4 text-uefs-gray-600" />
+            <ChevronLeft className="w-5 h-5 text-uefs-gray-600 group-hover:text-uefs-primary" />
           </button>
           <button
             onClick={() => navigateMonth('next')}
-            className="p-2 rounded-lg hover:bg-uefs-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-uefs-gray-100 transition-colors group"
           >
-            <ChevronRight className="w-4 h-4 text-uefs-gray-600" />
+            <ChevronRight className="w-5 h-5 text-uefs-gray-600 group-hover:text-uefs-primary" />
           </button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="flex items-center justify-between mb-4 p-3 bg-uefs-gray-50 rounded-lg">
+      <div className="flex items-center justify-between mb-6 p-4 bg-gradient-to-r from-uefs-gray-50 to-uefs-primary/5 rounded-xl border border-uefs-gray-100">
         <div className="flex items-center space-x-2">
           <Clock className="w-4 h-4 text-uefs-accent" />
-          <span className="text-sm text-uefs-gray-700">
-            {availableCount} dias disponíveis este mês
+          <span className="text-sm font-medium text-uefs-gray-700">
+            {availableCount} funcionando / {scheduledCount} programados
           </span>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-3">
           <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-uefs-accent rounded-full"></div>
-            <span className="text-xs text-uefs-gray-600">Disponível</span>
+            <div className="w-3 h-3 bg-uefs-accent rounded-full shadow-sm"></div>
+            <span className="text-xs text-uefs-gray-600 font-medium">Funcionando</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 bg-uefs-gray-300 rounded-full"></div>
-            <span className="text-xs text-uefs-gray-600">Indisponível</span>
+            <div className="w-3 h-3 bg-uefs-danger rounded-full shadow-sm"></div>
+            <span className="text-xs text-uefs-gray-600 font-medium">Fechado</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-3 h-3 bg-uefs-gray-300 rounded-full shadow-sm"></div>
+            <span className="text-xs text-uefs-gray-600 font-medium">Sem dados</span>
           </div>
         </div>
       </div>
@@ -147,27 +166,30 @@ export function ModernCalendar({
           }
 
           const available = isDateAvailable(date);
+          const scheduled = hasSchedule(date);
           const selected = isDateSelected(date);
           const today = isToday(date);
 
           return (
             <button
               key={date.toISOString()}
-              onClick={() => available && onDateSelect?.(date)}
-              disabled={!available}
+              onClick={() => scheduled && onDateSelect?.(date)}
+              disabled={!scheduled}
               className={cn(
                 "relative p-2 text-sm rounded-lg transition-all duration-200 border",
                 {
-                  // Available dates
-                  "bg-uefs-accent/10 border-uefs-accent/20 text-uefs-dark hover:bg-uefs-accent/20 hover:scale-105": available && !selected,
+                  // Available dates (scheduled and active)
+                  "bg-uefs-accent/10 border-uefs-accent/20 text-uefs-dark hover:bg-uefs-accent/20 hover:scale-105": scheduled && available && !selected,
+                  // Closed dates (scheduled but not active)
+                  "bg-uefs-danger/10 border-uefs-danger/20 text-uefs-dark hover:bg-uefs-danger/20": scheduled && !available && !selected,
                   // Selected date
                   "bg-uefs-primary text-white border-uefs-primary shadow-uefs": selected,
                   // Today marker
                   "ring-2 ring-uefs-secondary ring-offset-1": today && !selected,
-                  // Unavailable dates
-                  "text-uefs-gray-300 border-transparent cursor-not-allowed": !available,
+                  // Unscheduled dates
+                  "text-uefs-gray-300 border-transparent cursor-not-allowed": !scheduled,
                   // Hover effects
-                  "hover:shadow-md": available,
+                  "hover:shadow-md": scheduled,
                 }
               )}
             >
@@ -178,9 +200,12 @@ export function ModernCalendar({
                 <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-uefs-secondary rounded-full"></div>
               )}
               
-              {/* Available indicator */}
-              {available && !selected && (
-                <div className="absolute top-1 right-1 w-2 h-2 bg-uefs-accent rounded-full"></div>
+              {/* Status indicator */}
+              {scheduled && !selected && (
+                <div className={cn(
+                  "absolute top-1 right-1 w-2 h-2 rounded-full",
+                  available ? "bg-uefs-accent" : "bg-uefs-danger"
+                )}></div>
               )}
             </button>
           );
@@ -190,7 +215,7 @@ export function ModernCalendar({
       {/* Legend */}
       <div className="mt-4 pt-4 border-t border-uefs-gray-200">
         <p className="text-xs text-uefs-gray-500 text-center">
-          Clique em uma data disponível para visualizar os horários
+          Clique em uma data programada para visualizar os horários específicos
         </p>
       </div>
     </div>

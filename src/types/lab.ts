@@ -14,10 +14,19 @@ export interface WeeklySchedule {
   sunday: ScheduleEntry;
 }
 
+export interface DailySchedule {
+  date: string; // ISO date string (YYYY-MM-DD)
+  start: string;
+  end: string;
+  active: boolean;
+  notes?: string;
+}
+
 export interface LabConfig {
   status: 'open' | 'closed' | 'maintenance';
   specialAlert: string;
   schedule: WeeklySchedule;
+  dailySchedules?: { [dateKey: string]: DailySchedule }; // date-indexed daily schedules
   lastUpdate: string;
 }
 
