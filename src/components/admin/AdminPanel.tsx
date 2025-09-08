@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, LogOut, AlertTriangle, Clock, MessageSquare } from 'lucide-react';
+import { Settings, LogOut, AlertTriangle, Clock, MessageSquare, Calendar, BookOpen } from 'lucide-react';
 import type { LabConfig } from '../../types/lab';
 import type { AuthUser } from '../../types/auth.types';
 import { Button } from '../ui/button';
@@ -8,6 +8,7 @@ import { Label } from '../ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ScheduleEditor } from './ScheduleEditor';
 import { DailyScheduleManager } from './DailyScheduleManager';
+import { AdminReservationManager } from './ReservationManager';
 
 interface AdminPanelProps {
   user: AuthUser;
@@ -21,6 +22,7 @@ export function AdminPanel({ user, config, onLogout, onUpdateConfig }: AdminPane
   const [status, setStatus] = useState(config.status);
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState('');
+  const [activeTab, setActiveTab] = useState<'general' | 'reservations' | 'schedules'>('general');
 
   const handleStatusUpdate = async (newStatus: 'open' | 'closed' | 'maintenance') => {
     setUpdating(true);
@@ -100,87 +102,137 @@ export function AdminPanel({ user, config, onLogout, onUpdateConfig }: AdminPane
         </CardHeader>
       </Card>
 
-      {/* Status Control */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Clock className="w-5 h-5" />
-            <span>Controle de Status</span>
-          </CardTitle>
-          <CardDescription>
-            Altere o status atual do laboratório
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button
-              onClick={() => handleStatusUpdate('open')}
-              disabled={updating || status === 'open'}
-              className={`${getStatusColor('open')} text-white`}
-              variant={status === 'open' ? 'default' : 'outline'}
-            >
-              🟢 Aberto
-            </Button>
-            <Button
-              onClick={() => handleStatusUpdate('maintenance')}
-              disabled={updating || status === 'maintenance'}
-              className={`${getStatusColor('maintenance')} text-white`}
-              variant={status === 'maintenance' ? 'default' : 'outline'}
-            >
-              🟡 Manutenção
-            </Button>
-            <Button
-              onClick={() => handleStatusUpdate('closed')}
-              disabled={updating || status === 'closed'}
-              className={`${getStatusColor('closed')} text-white`}
-              variant={status === 'closed' ? 'default' : 'outline'}
-            >
-              🔴 Fechado
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Navigation Tabs */}
+      <div className="flex space-x-1 bg-white rounded-xl p-1 shadow-lg border border-gray-200">
+        <button
+          onClick={() => setActiveTab('general')}
+          className={`flex-1 py-3 px-6 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+            activeTab === 'general'
+              ? 'bg-uefs-primary text-white shadow-md'
+              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+          }`}
+        >
+          <Settings className="w-4 h-4" />
+          Configurações Gerais
+        </button>
+        <button
+          onClick={() => setActiveTab('reservations')}
+          className={`flex-1 py-3 px-6 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+            activeTab === 'reservations'
+              ? 'bg-uefs-primary text-white shadow-md'
+              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          Gerenciar Reservas
+        </button>
+        <button
+          onClick={() => setActiveTab('schedules')}
+          className={`flex-1 py-3 px-6 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+            activeTab === 'schedules'
+              ? 'bg-uefs-primary text-white shadow-md'
+              : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          Gerenciar Horários
+        </button>
+      </div>
 
-      {/* Special Alert */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <AlertTriangle className="w-5 h-5" />
-            <span>Aviso Especial</span>
-          </CardTitle>
-          <CardDescription>
-            Crie avisos importantes que aparecerão na página principal
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="special-alert">Mensagem do Aviso</Label>
-            <Input
-              id="special-alert"
-              value={specialAlert}
-              onChange={(e) => setSpecialAlert(e.target.value)}
-              placeholder="Digite um aviso especial (deixe vazio para remover)"
-              disabled={updating}
-            />
-          </div>
-          <Button 
-            onClick={handleAlertUpdate}
-            disabled={updating}
-            className="flex items-center space-x-2"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>{updating ? 'Salvando...' : 'Salvar Aviso'}</span>
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Tab Content */}
+      {activeTab === 'general' && (
+        <>
+          {/* Status Control */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Clock className="w-5 h-5" />
+                <span>Controle de Status</span>
+              </CardTitle>
+              <CardDescription>
+                Altere o status atual do laboratório
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button
+                  onClick={() => handleStatusUpdate('open')}
+                  disabled={updating || status === 'open'}
+                  className={`${getStatusColor('open')} text-white`}
+                  variant={status === 'open' ? 'default' : 'outline'}
+                >
+                  🟢 Aberto
+                </Button>
+                <Button
+                  onClick={() => handleStatusUpdate('maintenance')}
+                  disabled={updating || status === 'maintenance'}
+                  className={`${getStatusColor('maintenance')} text-white`}
+                  variant={status === 'maintenance' ? 'default' : 'outline'}
+                >
+                  🟡 Manutenção
+                </Button>
+                <Button
+                  onClick={() => handleStatusUpdate('closed')}
+                  disabled={updating || status === 'closed'}
+                  className={`${getStatusColor('closed')} text-white`}
+                  variant={status === 'closed' ? 'default' : 'outline'}
+                >
+                  🔴 Fechado
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Schedule Editor */}
-      <ScheduleEditor config={config} onSave={onUpdateConfig} />
+          {/* Special Alert */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <AlertTriangle className="w-5 h-5" />
+                <span>Aviso Especial</span>
+              </CardTitle>
+              <CardDescription>
+                Crie avisos importantes que aparecerão na página principal
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="special-alert">Mensagem do Aviso</Label>
+                <Input
+                  id="special-alert"
+                  value={specialAlert}
+                  onChange={(e) => setSpecialAlert(e.target.value)}
+                  placeholder="Digite um aviso especial (deixe vazio para remover)"
+                  disabled={updating}
+                />
+              </div>
+              <Button 
+                onClick={handleAlertUpdate}
+                disabled={updating}
+                className="flex items-center space-x-2"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>{updating ? 'Salvando...' : 'Salvar Aviso'}</span>
+              </Button>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
-      {/* Daily Schedule Manager */}
-      <DailyScheduleManager />
+      {activeTab === 'reservations' && (
+        <AdminReservationManager />
+      )}
+
+      {activeTab === 'schedules' && (
+        <>
+          {/* Schedule Editor */}
+          <ScheduleEditor config={config} onSave={onUpdateConfig} />
+
+          {/* Daily Schedule Manager */}
+          <DailyScheduleManager />
+        </>
+      )}
 
       {/* Messages */}
       {message && (

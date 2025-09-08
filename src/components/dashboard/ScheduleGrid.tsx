@@ -210,34 +210,6 @@ export function ScheduleGrid({ config, selectedDate, dailySchedules }: ScheduleG
             );
           })}
         </div>
-        
-        {/* Last Update */}
-        <div className="mt-8 p-4 bg-uefs-gray-50 rounded-lg border border-uefs-gray-200">
-          <div className="text-center text-sm text-uefs-gray-600">
-            <p className="mb-3 font-semibold text-uefs-dark">
-              📋 Observações Importantes
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-              <div className="flex items-start space-x-2">
-                <span className="text-uefs-warning mt-0.5">⏰</span>
-                <span>Véspera de feriados: 08:00 - 14:00</span>
-              </div>
-              <div className="flex items-start space-x-2">
-                <span className="text-uefs-danger mt-0.5">🚫</span>
-                <span>Feriados nacionais e estaduais: Fechado</span>
-              </div>
-              <div className="flex items-start space-x-2">
-                <span className="text-uefs-secondary mt-0.5">ℹ️</span>
-                <span>Horários podem ser alterados conforme necessidade</span>
-              </div>
-            </div>
-            <div className="mt-4 pt-4 border-t border-uefs-gray-300">
-              <p className="text-xs text-uefs-gray-500">
-                Última atualização: {new Date(config.lastUpdate).toLocaleString('pt-BR')}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

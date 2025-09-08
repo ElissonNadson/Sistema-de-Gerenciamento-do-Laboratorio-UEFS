@@ -48,25 +48,27 @@ Uma aplicação web moderna que centraliza todas as informações do laboratóri
 ## 📊 Funcionalidades Implementadas
 
 ### 🌍 Interface Pública
-1. **Visualização de Horários**
-   - Grid responsivo com horários da semana
-   - Destaque visual do dia atual
-   - Indicação de dias fechados/feriados
+1. **Sistema de Reservas**
+   - Visualização de todas as aulas agendadas
+   - Exibição de horários livres (não reservados)
+   - Formulário de solicitação de reserva para estudantes e professores
+   - Status das reservas: Pendente, Aprovada, Rejeitada
 
-2. **Status em Tempo Real**
+2. **Calendário de Aulas e Disponibilidade**
+   - Grid responsivo com horários da semana baseado no cronograma oficial
+   - Distinção visual entre aulas reservadas e horários livres
+   - Integração com dados do arquivo `cronograma_laboratorio_2025-2_Version2.xlsx`
+   - Indicação de feriados e horários especiais
+
+3. **Status em Tempo Real**
    - Indicador visual: Aberto 🟢 / Fechado 🔴 / Manutenção 🟡
-   - Atualização automática baseada nos horários
-   - Cálculo inteligente considerando feriados
+   - Atualização automática baseada nos horários oficiais
+   - Cálculo inteligente considerando feriados e reservas
 
-3. **Sistema de Avisos**
+4. **Sistema de Avisos**
    - Banner destacado para avisos especiais
    - Mensagens configuráveis pelos administradores
    - Avisos temporários para mudanças pontuais
-
-4. **Calendário Interativo**
-   - Visualização de datas disponíveis
-   - Integração com os horários de funcionamento
-   - Interface moderna e intuitiva
 
 ### 🔐 Painel Administrativo
 1. **Sistema de Autenticação**
@@ -74,54 +76,66 @@ Uma aplicação web moderna que centraliza todas as informações do laboratóri
    - Controle de acesso baseado em funções
    - Sessões seguras com tokens JWT
 
-2. **Gestão de Status**
+2. **Gestão de Reservas**
+   - Aprovação/rejeição de solicitações de reserva
+   - Visualização de dados completos das reservas:
+     - Email institucional do solicitante
+     - Nome da matéria e curso (para professores)
+     - Data e horário solicitado
+   - Histórico de reservas por usuário
+
+3. **Sistema de Notificações**
+   - Alertas quando novas reservas são solicitadas
+   - Notificações para professores e alunos sobre status das reservas
+   - Dashboard de atividades recentes
+
+4. **Gestão de Status e Horários**
    - Alteração manual do status do laboratório
    - Override dos horários automáticos
-   - Controle de emergência
+   - Configuração de horários especiais e exceções
+   - Gestão de feriados baseada no cronograma oficial
 
-3. **Gerenciamento de Avisos**
+5. **Gerenciamento de Avisos**
    - Criação e edição de avisos especiais
    - Preview em tempo real
    - Programação de avisos temporários
 
-4. **Controle de Horários**
-   - Modificação de horários pontuais
-   - Configuração de horários especiais
-   - Gestão de feriados e exceções
-
-5. **Histórico e Auditoria**
-   - Log de todas as alterações
+6. **Histórico e Auditoria**
+   - Log de todas as alterações e reservas
    - Rastreamento de usuários responsáveis
-   - Timestamps de modificações
+   - Timestamps de modificações e solicitações
 
 ## 🎯 Casos de Uso Principais
 
 ### 👨‍🎓 Estudantes
 ```
 Como estudante, eu quero:
-├── Verificar se o laboratório está aberto
-├── Consultar os horários da semana
-├── Ver avisos importantes
-└── Planejar meus estudos com base na disponibilidade
+├── Ver todas as aulas que vão acontecer
+├── Visualizar os horários que estão livres (não reservados pelos professores)
+├── Solicitar reserva de horário (mesmo processo dos professores)
+└── Entender que quando professores reservam é para aulas específicas
 ```
 
 ### 👩‍🏫 Professores
 ```
 Como professor, eu quero:
-├── Confirmar a disponibilidade para aulas
-├── Verificar mudanças de horário
-├── Acessar informações de contato
-└── Planejar atividades práticas
+├── Ver a disponibilidade para aulas
+├── Solicitar reserva fornecendo:
+    ├── Email institucional
+    ├── Nome da matéria
+    └── Curso
 ```
 
 ### 👨‍💼 Administradores
 ```
 Como administrador, eu quero:
-├── Alterar status em tempo real
+├── Confirmar reservas de professores e alunos
+├── Ajustar horários e reservas
 ├── Publicar avisos urgentes
 ├── Modificar horários excepcionais
 ├── Controlar acesso ao sistema
-└── Monitorar uso e alterações
+├── Monitorar uso e alterações
+└── Receber notificações quando professores/alunos fizerem reservas
 ```
 
 ## 📈 Benefícios Alcançados
@@ -190,25 +204,29 @@ graph TD
 ## 🚧 Roadmap Futuro
 
 ### 📅 Próximas Funcionalidades
-1. **Sistema de Reservas**
-   - Agendamento de horários específicos
-   - Controle de capacidade
-   - Notificações automáticas
+1. **Sistema de Reservas Avançado**
+   - Reservas recorrentes para disciplinas
+   - Sistema de confirmação automática baseado em critérios
+   - Integração com calendário acadêmico da UEFS
+   - Notificações por email para mudanças de status
 
 2. **Dashboard Analítico**
-   - Estatísticas de uso
-   - Relatórios de frequência
-   - Métricas de ocupação
+   - Estatísticas de uso do laboratório
+   - Relatórios de ocupação por período
+   - Métricas de aprovação/rejeição de reservas
+   - Análise de demanda por horários
 
 3. **Integração Acadêmica**
-   - Conexão com sistema acadêmico
-   - Sincronização de horários de aula
-   - Calendário acadêmico automático
+   - Conexão com sistema acadêmico da UEFS
+   - Validação automática de emails institucionais
+   - Sincronização com disciplinas cadastradas
+   - Import automático do cronograma oficial
 
 4. **Aplicativo Mobile**
    - App nativo para iOS/Android
-   - Notificações push
-   - Modo offline
+   - Notificações push para status de reservas
+   - Modo offline para consulta de horários
+   - Scanner QR para acesso rápido
 
 ### 🎯 Melhorias Planejadas
 - **Performance**: Implementação de PWA completa
